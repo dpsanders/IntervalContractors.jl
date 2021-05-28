@@ -1,52 +1,45 @@
 #=
- Copyright 2013-2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
- Copyright 2015-2016 Oliver Heimlich
-
- Original author: Marco Nehmeier (unit tests in libieeep1788,
-                  original license: Apache License 2.0)
+ Copyright 2013 - 2015 Marco Nehmeier (nehmeier@informatik.uni-wuerzburg.de)
+ Copyright 2015 Oliver Heimlich (oheim@posteo.de)
+ 
+ Original author: Marco Nehmeier (unit tests in libieeep1788)
  Converted into portable ITL format by Oliver Heimlich with minor corrections.
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, see <http://www.gnu.org/licenses/>.
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
 =#
 #Language imports
 
-#Test library imports
-using Test
 
-#Arithmetic library imports
-using IntervalArithmetic
 
 #Preamble
 setprecision(53)
 setprecision(Interval, Float64)
-# setrounding(Interval, :correct)
-@format full
+setrounding(Interval, :tight)
 
-@testset "minimal_sqr_rev_test" begin
-    @test sqr_rev(∅, -∞..∞)[2] == ∅
-    @test sqr_rev(Interval(-10.0, -1.0), -∞..∞)[2] == ∅
-    @test sqr_rev(Interval(0.0, Inf), -∞..∞)[2] == entireinterval(Float64)
-    @test sqr_rev(Interval(0.0, 1.0), -∞..∞)[2] == Interval(-1.0, 1.0)
-    @test sqr_rev(Interval(-0.5, 1.0), -∞..∞)[2] == Interval(-1.0, 1.0)
-    @test sqr_rev(Interval(-1000.0, 1.0), -∞..∞)[2] == Interval(-1.0, 1.0)
-    @test sqr_rev(Interval(0.0, 25.0), -∞..∞)[2] == Interval(-5.0, 5.0)
-    @test sqr_rev(Interval(-1.0, 25.0), -∞..∞)[2] == Interval(-5.0, 5.0)
-    @test sqr_rev(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), -∞..∞)[2] == Interval(-0x1.999999999999bp-4, 0x1.999999999999bp-4)
-    @test sqr_rev(Interval(0.0, 0x1.fffffffffffe1p+1), -∞..∞)[2] == Interval(-0x1.ffffffffffff1p+0, 0x1.ffffffffffff1p+0)
+@testset "minimal_sqrRev_test" begin
+    @test sqr_rev(∅)[2] == ∅
+    @test sqr_rev(Interval(-10.0, -1.0))[2] == ∅
+    @test sqr_rev(Interval(0.0, Inf))[2] == entireinterval(Float64)
+    @test sqr_rev(Interval(0.0, 1.0))[2] == Interval(-1.0, 1.0)
+    @test sqr_rev(Interval(-0.5, 1.0))[2] == Interval(-1.0, 1.0)
+    @test sqr_rev(Interval(-1000.0, 1.0))[2] == Interval(-1.0, 1.0)
+    @test sqr_rev(Interval(0.0, 25.0))[2] == Interval(-5.0, 5.0)
+    @test sqr_rev(Interval(-1.0, 25.0))[2] == Interval(-5.0, 5.0)
+    @test sqr_rev(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7))[2] == Interval(-0x1.999999999999bp-4, 0x1.999999999999bp-4)
+    @test sqr_rev(Interval(0.0, 0x1.fffffffffffe1p+1))[2] == Interval(-0x1.ffffffffffff1p+0, 0x1.ffffffffffff1p+0)
 end
 
-@testset "minimal_sqr_rev_bin_test" begin
+@testset "minimal_sqrRevBin_test" begin
     @test sqr_rev(∅, Interval(-5.0, 1.0))[2] == ∅
     @test sqr_rev(Interval(-10.0, -1.0), Interval(-5.0, 1.0))[2] == ∅
     @test sqr_rev(Interval(0.0, Inf), Interval(-5.0, 1.0))[2] == Interval(-5.0, 1.0)
@@ -60,25 +53,67 @@ end
     @test sqr_rev(Interval(0.0, 0x1.fffffffffffe1p+1), Interval(-0.1, Inf))[2] == Interval(-0.1, 0x1.ffffffffffff1p+0)
 end
 
-@testset "minimal_sqr_rev_dec_test" begin
+@testset "minimal_sqrRev_dec_test" begin
+    @test sqr_rev(DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(sqr_rev(DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test sqr_rev(DecoratedInterval(Interval(-10.0, -1.0), com)) == DecoratedInterval(∅, trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-10.0, -1.0), com))) == decoration(DecoratedInterval(∅, trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, Inf), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, Inf), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, 1.0), def)) == DecoratedInterval(Interval(-1.0, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, 1.0), def))) == decoration(DecoratedInterval(Interval(-1.0, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(-0.5, 1.0), dac)) == DecoratedInterval(Interval(-1.0, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-0.5, 1.0), dac))) == decoration(DecoratedInterval(Interval(-1.0, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(-1000.0, 1.0), com)) == DecoratedInterval(Interval(-1.0, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-1000.0, 1.0), com))) == decoration(DecoratedInterval(Interval(-1.0, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, 25.0), def)) == DecoratedInterval(Interval(-5.0, 5.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, 25.0), def))) == decoration(DecoratedInterval(Interval(-5.0, 5.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(-1.0, 25.0), dac)) == DecoratedInterval(Interval(-5.0, 5.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-1.0, 25.0), dac))) == decoration(DecoratedInterval(Interval(-5.0, 5.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com)) == DecoratedInterval(Interval(-0x1.999999999999bp-4, 0x1.999999999999bp-4), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), com))) == decoration(DecoratedInterval(Interval(-0x1.999999999999bp-4, 0x1.999999999999bp-4), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, 0x1.fffffffffffe1p+1), def)) == DecoratedInterval(Interval(-0x1.ffffffffffff1p+0, 0x1.ffffffffffff1p+0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, 0x1.fffffffffffe1p+1), def))) == decoration(DecoratedInterval(Interval(-0x1.ffffffffffff1p+0, 0x1.ffffffffffff1p+0), trv))
 end
 
-@testset "minimal_sqr_rev_dec_bin_test" begin
+@testset "minimal_sqrRev_dec_bin_test" begin
+    @test sqr_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-5.0, 1.0), def)) == DecoratedInterval(∅, trv)
+    @test decoration(sqr_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-5.0, 1.0), def))) == decoration(DecoratedInterval(∅, trv))
+    @test sqr_rev(DecoratedInterval(Interval(-10.0, -1.0), com), DecoratedInterval(Interval(-5.0, 1.0), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-10.0, -1.0), com), DecoratedInterval(Interval(-5.0, 1.0), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, Inf), def), DecoratedInterval(Interval(-5.0, 1.0), dac)) == DecoratedInterval(Interval(-5.0, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, Inf), def), DecoratedInterval(Interval(-5.0, 1.0), dac))) == decoration(DecoratedInterval(Interval(-5.0, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-0.1, 1.0), def)) == DecoratedInterval(Interval(-0.1, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-0.1, 1.0), def))) == decoration(DecoratedInterval(Interval(-0.1, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(-0.5, 1.0), def), DecoratedInterval(Interval(-0.1, 1.0), dac)) == DecoratedInterval(Interval(-0.1, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-0.5, 1.0), def), DecoratedInterval(Interval(-0.1, 1.0), dac))) == decoration(DecoratedInterval(Interval(-0.1, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(-1000.0, 1.0), com), DecoratedInterval(Interval(-0.1, 1.0), def)) == DecoratedInterval(Interval(-0.1, 1.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-1000.0, 1.0), com), DecoratedInterval(Interval(-0.1, 1.0), def))) == decoration(DecoratedInterval(Interval(-0.1, 1.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, 25.0), def), DecoratedInterval(Interval(-4.1, 6.0), com)) == DecoratedInterval(Interval(-4.1, 5.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, 25.0), def), DecoratedInterval(Interval(-4.1, 6.0), com))) == decoration(DecoratedInterval(Interval(-4.1, 5.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(-1.0, 25.0), dac), DecoratedInterval(Interval(-4.1, 7.0), def)) == DecoratedInterval(Interval(-4.1, 5.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(-1.0, 25.0), dac), DecoratedInterval(Interval(-4.1, 7.0), def))) == decoration(DecoratedInterval(Interval(-4.1, 5.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(1.0, 25.0), dac), DecoratedInterval(Interval(0.0, 7.0), def)) == DecoratedInterval(Interval(1.0, 5.0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(1.0, 25.0), dac), DecoratedInterval(Interval(0.0, 7.0), def))) == decoration(DecoratedInterval(Interval(1.0, 5.0), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), def), DecoratedInterval(Interval(-0.1, Inf), dac)) == DecoratedInterval(Interval(-0.1, 0x1.999999999999bp-4), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0x1.47ae147ae147bp-7, 0x1.47ae147ae147cp-7), def), DecoratedInterval(Interval(-0.1, Inf), dac))) == decoration(DecoratedInterval(Interval(-0.1, 0x1.999999999999bp-4), trv))
+    @test sqr_rev(DecoratedInterval(Interval(0.0, 0x1.fffffffffffe1p+1), dac), DecoratedInterval(Interval(-0.1, Inf), dac)) == DecoratedInterval(Interval(-0.1, 0x1.ffffffffffff1p+0), trv)
+    @test decoration(sqr_rev(DecoratedInterval(Interval(0.0, 0x1.fffffffffffe1p+1), dac), DecoratedInterval(Interval(-0.1, Inf), dac))) == decoration(DecoratedInterval(Interval(-0.1, 0x1.ffffffffffff1p+0), trv))
 end
 
-@testset "minimal_abs_rev_test" begin
-    @test abs_rev(∅, -∞..∞)[2] == ∅
-    @test abs_rev(Interval(-1.1, -0.4), -∞..∞)[2] == ∅
-    @test abs_rev(Interval(0.0, Inf), -∞..∞)[2] == entireinterval(Float64)
-    @test abs_rev(Interval(1.1, 2.1), -∞..∞)[2] == Interval(-2.1, 2.1)
-    @test abs_rev(Interval(-1.1, 2.0), -∞..∞)[2] == Interval(-2.0, 2.0)
-    @test abs_rev(Interval(-1.1, 0.0), -∞..∞)[2] == Interval(0.0, 0.0)
-    @test abs_rev(Interval(-1.9, 0.2), -∞..∞)[2] == Interval(-0.2, 0.2)
-    @test abs_rev(Interval(0.0, 0.2), -∞..∞)[2] == Interval(-0.2, 0.2)
-    @test abs_rev(Interval(-1.5, Inf), -∞..∞)[2] == entireinterval(Float64)
+@testset "minimal_absRev_test" begin
+    @test abs_rev(∅)[2] == ∅
+    @test abs_rev(Interval(-1.1, -0.4))[2] == ∅
+    @test abs_rev(Interval(0.0, Inf))[2] == entireinterval(Float64)
+    @test abs_rev(Interval(1.1, 2.1))[2] == Interval(-2.1, 2.1)
+    @test abs_rev(Interval(-1.1, 2.0))[2] == Interval(-2.0, 2.0)
+    @test abs_rev(Interval(-1.1, 0.0))[2] == Interval(0.0, 0.0)
+    @test abs_rev(Interval(-1.9, 0.2))[2] == Interval(-0.2, 0.2)
+    @test abs_rev(Interval(0.0, 0.2))[2] == Interval(-0.2, 0.2)
+    @test abs_rev(Interval(-1.5, Inf))[2] == entireinterval(Float64)
 end
 
-@testset "minimal_abs_rev_bin_test" begin
+@testset "minimal_absRevBin_test" begin
     @test abs_rev(∅, Interval(-1.1, 5.0))[2] == ∅
     @test abs_rev(Interval(-1.1, -0.4), Interval(-1.1, 5.0))[2] == ∅
     @test abs_rev(Interval(0.0, Inf), Interval(-1.1, 5.0))[2] == Interval(-1.1, 5.0)
@@ -88,38 +123,588 @@ end
     @test abs_rev(Interval(-1.9, 0.2), Interval(-1.1, 5.0))[2] == Interval(-0.2, 0.2)
 end
 
-@testset "minimal_abs_rev_dec_test" begin
+@testset "minimal_absRev_dec_test" begin
+    @test abs_rev(DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(abs_rev(DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.1, -0.4), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.1, -0.4), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test abs_rev(DecoratedInterval(Interval(0.0, Inf), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(0.0, Inf), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test abs_rev(DecoratedInterval(Interval(1.1, 2.1), com)) == DecoratedInterval(Interval(-2.1, 2.1), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(1.1, 2.1), com))) == decoration(DecoratedInterval(Interval(-2.1, 2.1), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.1, 2.0), def)) == DecoratedInterval(Interval(-2.0, 2.0), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.1, 2.0), def))) == decoration(DecoratedInterval(Interval(-2.0, 2.0), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.1, 0.0), dac)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.1, 0.0), dac))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.9, 0.2), com)) == DecoratedInterval(Interval(-0.2, 0.2), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.9, 0.2), com))) == decoration(DecoratedInterval(Interval(-0.2, 0.2), trv))
+    @test abs_rev(DecoratedInterval(Interval(0.0, 0.2), def)) == DecoratedInterval(Interval(-0.2, 0.2), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(0.0, 0.2), def))) == decoration(DecoratedInterval(Interval(-0.2, 0.2), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.5, Inf), def)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.5, Inf), def))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 
-@testset "minimal_abs_rev_dec_bin_test" begin
+@testset "minimal_absRev_dec_bin_test" begin
+    @test abs_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.1, 5.0), com)) == DecoratedInterval(∅, trv)
+    @test decoration(abs_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.1, 5.0), com))) == decoration(DecoratedInterval(∅, trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.1, -0.4), dac), DecoratedInterval(Interval(-1.1, 5.0), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.1, -0.4), dac), DecoratedInterval(Interval(-1.1, 5.0), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test abs_rev(DecoratedInterval(Interval(0.0, Inf), def), DecoratedInterval(Interval(-1.1, 5.0), def)) == DecoratedInterval(Interval(-1.1, 5.0), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(0.0, Inf), def), DecoratedInterval(Interval(-1.1, 5.0), def))) == decoration(DecoratedInterval(Interval(-1.1, 5.0), trv))
+    @test abs_rev(DecoratedInterval(Interval(1.1, 2.1), dac), DecoratedInterval(Interval(-1.0, 5.0), def)) == DecoratedInterval(Interval(1.1, 2.1), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(1.1, 2.1), dac), DecoratedInterval(Interval(-1.0, 5.0), def))) == decoration(DecoratedInterval(Interval(1.1, 2.1), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.1, 2.0), com), DecoratedInterval(Interval(-1.1, 5.0), def)) == DecoratedInterval(Interval(-1.1, 2.0), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.1, 2.0), com), DecoratedInterval(Interval(-1.1, 5.0), def))) == decoration(DecoratedInterval(Interval(-1.1, 2.0), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.1, 0.0), def), DecoratedInterval(Interval(-1.1, 5.0), def)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.1, 0.0), def), DecoratedInterval(Interval(-1.1, 5.0), def))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test abs_rev(DecoratedInterval(Interval(-1.9, 0.2), dac), DecoratedInterval(Interval(-1.1, 5.0), def)) == DecoratedInterval(Interval(-0.2, 0.2), trv)
+    @test decoration(abs_rev(DecoratedInterval(Interval(-1.9, 0.2), dac), DecoratedInterval(Interval(-1.1, 5.0), def))) == decoration(DecoratedInterval(Interval(-0.2, 0.2), trv))
 end
 
-@testset "minimal_pown_rev_test" begin
-
+@testset "minimal_power_rev_test" begin
+    @test power_rev(∅, 0)[2] == ∅
+    @test power_rev(Interval(1.0, 1.0), 0)[2] == entireinterval(Float64)
+    @test power_rev(Interval(-1.0, 5.0), 0)[2] == entireinterval(Float64)
+    @test power_rev(Interval(-1.0, 0.0), 0)[2] == ∅
+    @test power_rev(Interval(-1.0, -0.0), 0)[2] == ∅
+    @test power_rev(Interval(1.1, 10.0), 0)[2] == ∅
+    @test power_rev(∅, 1)[2] == ∅
+    @test power_rev(entireinterval(Float64), 1)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), 1)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(-0.0, -0.0), 1)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(13.1, 13.1), 1)[2] == Interval(13.1, 13.1)
+    @test power_rev(Interval(-7451.145, -7451.145), 1)[2] == Interval(-7451.145, -7451.145)
+    @test power_rev(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), 1)[2] == Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023)
+    @test power_rev(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), 1)[2] == Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023)
+    @test power_rev(Interval(0.0, Inf), 1)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-0.0, Inf), 1)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-Inf, 0.0), 1)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-Inf, -0.0), 1)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-324.3, 2.5), 1)[2] == Interval(-324.3, 2.5)
+    @test power_rev(Interval(0.01, 2.33), 1)[2] == Interval(0.01, 2.33)
+    @test power_rev(Interval(-1.9, -0.33), 1)[2] == Interval(-1.9, -0.33)
+    @test power_rev(∅, 2)[2] == ∅
+    @test power_rev(Interval(-5.0, -1.0), 2)[2] == ∅
+    @test power_rev(Interval(0.0, Inf), 2)[2] == entireinterval(Float64)
+    @test power_rev(Interval(-0.0, Inf), 2)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), 2)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(-0.0, -0.0), 2)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(0x1.573851eb851ebp+7, 0x1.573851eb851ecp+7), 2)[2] == Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3)
+    @test power_rev(Interval(0x1.a794a4e7cfaadp+25, 0x1.a794a4e7cfaaep+25), 2)[2] == Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12)
+    @test power_rev(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), 2)[2] == Interval(-0x1p+512, 0x1p+512)
+    @test power_rev(Interval(0.0, 0x1.9ad27d70a3d72p+16), 2)[2] == Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8)
+    @test power_rev(Interval(-0.0, 0x1.9ad27d70a3d72p+16), 2)[2] == Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8)
+    @test power_rev(Interval(0x1.a36e2eb1c432cp-14, 0x1.5b7318fc50482p+2), 2)[2] == Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(0x1.be0ded288ce7p-4, 0x1.ce147ae147ae1p+1), 2)[2] == Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0)
+    @test power_rev(∅, 8)[2] == ∅
+    @test power_rev(entireinterval(Float64), 8)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, Inf), 8)[2] == entireinterval(Float64)
+    @test power_rev(Interval(-0.0, Inf), 8)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), 8)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(-0.0, -0.0), 8)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(0x1.9d8fd495853f5p+29, 0x1.9d8fd495853f6p+29), 8)[2] == Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3)
+    @test power_rev(Interval(0x1.dfb1bb622e70dp+102, 0x1.dfb1bb622e70ep+102), 8)[2] == Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12)
+    @test power_rev(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), 8)[2] == Interval(-0x1p+128, 0x1p+128)
+    @test power_rev(Interval(0.0, 0x1.a87587109655p+66), 8)[2] == Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8)
+    @test power_rev(Interval(-0.0, 0x1.a87587109655p+66), 8)[2] == Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8)
+    @test power_rev(Interval(0x1.cd2b297d889bdp-54, 0x1.b253d9f33ce4dp+9), 8)[2] == Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(0x1.26f1fcdd502a3p-13, 0x1.53abd7bfc4fc6p+7), 8)[2] == Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0)
+    @test power_rev(∅, 3)[2] == ∅
+    @test power_rev(entireinterval(Float64), 3)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), 3)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(-0.0, -0.0), 3)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(0x1.1902e978d4fdep+11, 0x1.1902e978d4fdfp+11), 3)[2] == Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3)
+    @test power_rev(Interval(-0x1.81460637b9a3dp+38, -0x1.81460637b9a3cp+38), 3)[2] == Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12)
+    @test power_rev(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), 3)[2] == Interval(0x1.428a2f98d728ap+341, 0x1.428a2f98d728bp+341)
+    @test power_rev(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), 3)[2] == Interval(-0x1.428a2f98d728bp+341, -0x1.428a2f98d728ap+341)
+    @test power_rev(Interval(0.0, Inf), 3)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-0.0, Inf), 3)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-Inf, 0.0), 3)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-Inf, -0.0), 3)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-0x1.0436d2f418938p+25, 0x1.f4p+3), 3)[2] == Interval(-0x1.444cccccccccep+8, 0x1.4p+1)
+    @test power_rev(Interval(0x1.0c6f7a0b5ed8dp-20, 0x1.94c75e6362a6p+3), 3)[2] == Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(-0x1.b6f9db22d0e55p+2, -0x1.266559f6ec5b1p-5), 3)[2] == Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2)
+    @test power_rev(∅, 7)[2] == ∅
+    @test power_rev(entireinterval(Float64), 7)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), 7)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(-0.0, -0.0), 7)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(0x1.f91d1b185493bp+25, 0x1.f91d1b185493cp+25), 7)[2] == Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3)
+    @test power_rev(Interval(-0x1.07b1da32f9b59p+90, -0x1.07b1da32f9b58p+90), 7)[2] == Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12)
+    @test power_rev(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), 7)[2] == Interval(0x1.381147622f886p+146, 0x1.381147622f887p+146)
+    @test power_rev(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), 7)[2] == Interval(-0x1.381147622f887p+146, -0x1.381147622f886p+146)
+    @test power_rev(Interval(0.0, Inf), 7)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-0.0, Inf), 7)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-Inf, 0.0), 7)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-Inf, -0.0), 7)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-0x1.4f109959e6d7fp+58, 0x1.312dp+9), 7)[2] == Interval(-0x1.444cccccccccep+8, 0x1.4p+1)
+    @test power_rev(Interval(0x1.6849b86a12b9bp-47, 0x1.74d0373c76313p+8), 7)[2] == Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(-0x1.658c775099757p+6, -0x1.bee30301bf47ap-12), 7)[2] == Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2)
+    @test power_rev(∅, -2)[2] == ∅
+    @test power_rev(Interval(0.0, Inf), -2)[2] == entireinterval(Float64)
+    @test power_rev(Interval(-0.0, Inf), -2)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), -2)[2] == ∅
+    @test power_rev(Interval(-0.0, -0.0), -2)[2] == ∅
+    @test power_rev(Interval(-10.0, 0.0), -2)[2] == ∅
+    @test power_rev(Interval(-10.0, -0.0), -2)[2] == ∅
+    @test power_rev(Interval(0x0p+0, 0x0.0000000000001p-1022), -2)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0x1.3f0c482c977c9p-17, Inf), -2)[2] == Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8)
+    @test power_rev(Interval(0x1.793d85ef38e47p-3, 0x1.388p+13), -2)[2] == Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(0x1.1ba81104f6c8p-2, 0x1.25d8fa1f801e1p+3), -2)[2] == Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0)
+    @test power_rev(∅, -8)[2] == ∅
+    @test power_rev(Interval(0.0, Inf), -8)[2] == entireinterval(Float64)
+    @test power_rev(Interval(-0.0, Inf), -8)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), -8)[2] == ∅
+    @test power_rev(Interval(-0.0, -0.0), -8)[2] == ∅
+    @test power_rev(Interval(0x0p+0, 0x0.0000000000001p-1022), -8)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0x1.34cc3764d1e0cp-67, Inf), -8)[2] == Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8)
+    @test power_rev(Interval(0x1.2dc80db11ab7cp-10, 0x1.1c37937e08p+53), -8)[2] == Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(0x1.81e104e61630dp-8, 0x1.bc64f21560e34p+12), -8)[2] == Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0)
+    @test power_rev(∅, -1)[2] == ∅
+    @test power_rev(entireinterval(Float64), -1)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), -1)[2] == ∅
+    @test power_rev(Interval(-0.0, -0.0), -1)[2] == ∅
+    @test power_rev(Interval(0x1.38abf82ee6986p-4, 0x1.38abf82ee6987p-4), -1)[2] == Interval(0x1.a333333333332p+3, 0x1.a333333333335p+3)
+    @test power_rev(Interval(-0x1.197422c9048bfp-13, -0x1.197422c9048bep-13), -1)[2] == Interval(-0x1.d1b251eb851eep+12, -0x1.d1b251eb851ebp+12)
+    @test power_rev(Interval(0x0.4p-1022, 0x0.4000000000001p-1022), -1)[2] == Interval(0x1.ffffffffffff8p+1023, Inf)
+    @test power_rev(Interval(-0x0.4000000000001p-1022, -0x0.4p-1022), -1)[2] == Interval(-Inf, -0x1.ffffffffffff8p+1023)
+    @test power_rev(Interval(0.0, Inf), -1)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-0.0, Inf), -1)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-Inf, 0.0), -1)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-Inf, -0.0), -1)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(0x1.b77c278dbbe13p-2, 0x1.9p+6), -1)[2] == Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(-0x1.83e0f83e0f83ep+1, -0x1.0d79435e50d79p-1), -1)[2] == Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2)
+    @test power_rev(∅, -3)[2] == ∅
+    @test power_rev(entireinterval(Float64), -3)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), -3)[2] == ∅
+    @test power_rev(Interval(-0.0, -0.0), -3)[2] == ∅
+    @test power_rev(Interval(0x0p+0, 0x0.0000000000001p-1022), -3)[2] == Interval(0x1p+358, Inf)
+    @test power_rev(Interval(-0x0.0000000000001p-1022, -0x0p+0), -3)[2] == Interval(-Inf, -0x1p+358)
+    @test power_rev(Interval(0.0, Inf), -3)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-0.0, Inf), -3)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-Inf, 0.0), -3)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-Inf, -0.0), -3)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(0x1.43cfba61aacabp-4, 0x1.e848p+19), -3)[2] == Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(-0x1.bd393ce9e8e7cp+4, -0x1.2a95f6f7c066cp-3), -3)[2] == Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2)
+    @test power_rev(∅, -7)[2] == ∅
+    @test power_rev(entireinterval(Float64), -7)[2] == entireinterval(Float64)
+    @test power_rev(Interval(0.0, 0.0), -7)[2] == ∅
+    @test power_rev(Interval(-0.0, -0.0), -7)[2] == ∅
+    @test power_rev(Interval(0x0p+0, 0x0.0000000000001p-1022), -7)[2] == Interval(0x1.588cea3f093bcp+153, Inf)
+    @test power_rev(Interval(-0x0.0000000000001p-1022, -0x0p+0), -7)[2] == Interval(-Inf, -0x1.588cea3f093bcp+153)
+    @test power_rev(Interval(0.0, Inf), -7)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-0.0, Inf), -7)[2] == Interval(0.0, Inf)
+    @test power_rev(Interval(-Inf, 0.0), -7)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(-Inf, -0.0), -7)[2] == Interval(-Inf, 0.0)
+    @test power_rev(Interval(0x1.5f934d64162a9p-9, 0x1.6bcc41e9p+46), -7)[2] == Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(-0x1.254cdd3711ddbp+11, -0x1.6e95c4a761e19p-7), -7)[2] == Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2)
 end
 
-@testset "minimal_pown_rev_bin_test" begin
-
+@testset "minimal_power_revBin_test" begin
+    @test power_rev(∅, Interval(1.0, 1.0), 0)[2] == ∅
+    @test power_rev(Interval(1.0, 1.0), Interval(1.0, 1.0), 0)[2] == Interval(1.0, 1.0)
+    @test power_rev(Interval(-1.0, 5.0), Interval(-51.0, 12.0), 0)[2] == Interval(-51.0, 12.0)
+    @test power_rev(Interval(-1.0, 0.0), Interval(5.0, 10.0), 0)[2] == ∅
+    @test power_rev(Interval(-1.0, -0.0), Interval(-1.0, 1.0), 0)[2] == ∅
+    @test power_rev(Interval(1.1, 10.0), Interval(1.0, 41.0), 0)[2] == ∅
+    @test power_rev(∅, Interval(0.0, 100.1), 1)[2] == ∅
+    @test power_rev(entireinterval(Float64), Interval(-5.1, 10.0), 1)[2] == Interval(-5.1, 10.0)
+    @test power_rev(Interval(0.0, 0.0), Interval(-10.0, 5.1), 1)[2] == Interval(0.0, 0.0)
+    @test power_rev(Interval(-0.0, -0.0), Interval(1.0, 5.0), 1)[2] == ∅
+    @test power_rev(∅, Interval(5.0, 17.1), 2)[2] == ∅
+    @test power_rev(Interval(-5.0, -1.0), Interval(5.0, 17.1), 2)[2] == ∅
+    @test power_rev(Interval(0.0, Inf), Interval(5.6, 27.544), 2)[2] == Interval(5.6, 27.544)
+    @test power_rev(Interval(0.0, 0.0), Interval(1.0, 2.0), 2)[2] == ∅
+    @test power_rev(Interval(0x1.a36e2eb1c432cp-14, 0x1.5b7318fc50482p+2), Interval(1.0, Inf), 2)[2] == Interval(1.0, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(0x1.be0ded288ce7p-4, 0x1.ce147ae147ae1p+1), Interval(-Inf, -1.0), 2)[2] == Interval(-0x1.e666666666667p+0, -1.0)
+    @test power_rev(∅, Interval(-23.0, -1.0), 3)[2] == ∅
+    @test power_rev(entireinterval(Float64), Interval(-23.0, -1.0), 3)[2] == Interval(-23.0, -1.0)
+    @test power_rev(Interval(0.0, 0.0), Interval(1.0, 2.0), 3)[2] == ∅
+    @test power_rev(Interval(0x1.0c6f7a0b5ed8dp-20, 0x1.94c75e6362a6p+3), Interval(1.0, Inf), 3)[2] == Interval(1.0, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(-0x1.b6f9db22d0e55p+2, -0x1.266559f6ec5b1p-5), Interval(-Inf, -1.0), 3)[2] == Interval(-0x1.e666666666667p+0, -1.0)
+    @test power_rev(∅, Interval(-3.0, 17.3), -2)[2] == ∅
+    @test power_rev(Interval(0.0, Inf), Interval(-5.1, -0.1), -2)[2] == Interval(-5.1, -0.1)
+    @test power_rev(Interval(0.0, 0.0), Interval(27.2, 55.1), -2)[2] == ∅
+    @test power_rev(Interval(0x1.3f0c482c977c9p-17, Inf), Interval(-Inf, -0x1.fffffffffffffp1023), -2)[2] == ∅
+    @test power_rev(Interval(0x1.793d85ef38e47p-3, 0x1.388p+13), Interval(1.0, Inf), -2)[2] == Interval(1.0, 0x1.2a3d70a3d70a5p+1)
+    @test power_rev(Interval(0x1.1ba81104f6c8p-2, 0x1.25d8fa1f801e1p+3), Interval(-Inf, -1.0), -2)[2] == Interval(-0x1.e666666666667p+0, -1.0)
+    @test power_rev(∅, Interval(-5.1, 55.5), -1)[2] == ∅
+    @test power_rev(entireinterval(Float64), Interval(-5.1, 55.5), -1)[2] == Interval(-5.1, 55.5)
+    @test power_rev(Interval(0.0, 0.0), Interval(-5.1, 55.5), -1)[2] == ∅
+    @test power_rev(Interval(-Inf, -0.0), Interval(-1.0, 1.0), -1)[2] == Interval(-1.0, 0.0)
+    @test power_rev(Interval(0x1.b77c278dbbe13p-2, 0x1.9p+6), Interval(-1.0, 0.0), -1)[2] == ∅
+    @test power_rev(∅, Interval(-5.1, 55.5), -3)[2] == ∅
+    @test power_rev(entireinterval(Float64), Interval(-5.1, 55.5), -3)[2] == Interval(-5.1, 55.5)
+    @test power_rev(Interval(0.0, 0.0), Interval(-5.1, 55.5), -3)[2] == ∅
+    @test power_rev(Interval(-Inf, 0.0), Interval(5.1, 55.5), -3)[2] == ∅
+    @test power_rev(Interval(-Inf, -0.0), Interval(-32.0, 1.1), -3)[2] == Interval(-32.0, 0.0)
 end
 
-@testset "minimal_pown_rev_dec_test" begin
-
+@testset "minimal_power_rev_dec_test" begin
+    @test power_rev(DecoratedInterval(∅, trv), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(1.0, 1.0), com), 0) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(1.0, 1.0), com), 0)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(-1.0, 5.0), dac), 0) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.0, 5.0), dac), 0)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(-1.0, 0.0), def), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.0, 0.0), def), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-1.0, -0.0), dac), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.0, -0.0), dac), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(1.1, 10.0), com), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(1.1, 10.0), com), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(∅, trv), 1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), 1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), 1) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), 1)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), com), 1) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), com), 1)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 1) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 1)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(13.1, 13.1), def), 1) == DecoratedInterval(Interval(13.1, 13.1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(13.1, 13.1), def), 1)) == decoration(DecoratedInterval(Interval(13.1, 13.1), trv))
+    @test power_rev(DecoratedInterval(Interval(-7451.145, -7451.145), dac), 1) == DecoratedInterval(Interval(-7451.145, -7451.145), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-7451.145, -7451.145), dac), 1)) == decoration(DecoratedInterval(Interval(-7451.145, -7451.145), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com), 1) == DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com), 1)) == decoration(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), com), 1) == DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), com), 1)) == decoration(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 1) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 1)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), 1) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), 1)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), def), 1) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), def), 1)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), 1) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), 1)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-324.3, 2.5), dac), 1) == DecoratedInterval(Interval(-324.3, 2.5), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-324.3, 2.5), dac), 1)) == decoration(DecoratedInterval(Interval(-324.3, 2.5), trv))
+    @test power_rev(DecoratedInterval(Interval(0.01, 2.33), com), 1) == DecoratedInterval(Interval(0.01, 2.33), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.01, 2.33), com), 1)) == decoration(DecoratedInterval(Interval(0.01, 2.33), trv))
+    @test power_rev(DecoratedInterval(Interval(-1.9, -0.33), def), 1) == DecoratedInterval(Interval(-1.9, -0.33), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.9, -0.33), def), 1)) == decoration(DecoratedInterval(Interval(-1.9, -0.33), trv))
+    @test power_rev(DecoratedInterval(∅, trv), 2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), 2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 2) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 2)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), def), 2) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), def), 2)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), com), 2) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), com), 2)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 2) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 2)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.573851eb851ebp+7, 0x1.573851eb851ecp+7), def), 2) == DecoratedInterval(Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.573851eb851ebp+7, 0x1.573851eb851ecp+7), def), 2)) == decoration(DecoratedInterval(Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.a794a4e7cfaadp+25, 0x1.a794a4e7cfaaep+25), def), 2) == DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.a794a4e7cfaadp+25, 0x1.a794a4e7cfaaep+25), def), 2)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac), 2) == DecoratedInterval(Interval(-0x1p+512, 0x1p+512), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac), 2)) == decoration(DecoratedInterval(Interval(-0x1p+512, 0x1p+512), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0x1.9ad27d70a3d72p+16), dac), 2) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0x1.9ad27d70a3d72p+16), dac), 2)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, 0x1.9ad27d70a3d72p+16), def), 2) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, 0x1.9ad27d70a3d72p+16), def), 2)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.a36e2eb1c432cp-14, 0x1.5b7318fc50482p+2), com), 2) == DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.a36e2eb1c432cp-14, 0x1.5b7318fc50482p+2), com), 2)) == decoration(DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.be0ded288ce7p-4, 0x1.ce147ae147ae1p+1), def), 2) == DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.be0ded288ce7p-4, 0x1.ce147ae147ae1p+1), def), 2)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), 8) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), 8)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), 8) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), 8)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 8) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 8)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), 8) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), 8)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), 8) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), 8)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 8) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 8)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.9d8fd495853f5p+29, 0x1.9d8fd495853f6p+29), com), 8) == DecoratedInterval(Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.9d8fd495853f5p+29, 0x1.9d8fd495853f6p+29), com), 8)) == decoration(DecoratedInterval(Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.dfb1bb622e70dp+102, 0x1.dfb1bb622e70ep+102), dac), 8) == DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.dfb1bb622e70dp+102, 0x1.dfb1bb622e70ep+102), dac), 8)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), def), 8) == DecoratedInterval(Interval(-0x1p+128, 0x1p+128), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), def), 8)) == decoration(DecoratedInterval(Interval(-0x1p+128, 0x1p+128), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0x1.a87587109655p+66), dac), 8) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0x1.a87587109655p+66), dac), 8)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, 0x1.a87587109655p+66), def), 8) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, 0x1.a87587109655p+66), def), 8)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.cd2b297d889bdp-54, 0x1.b253d9f33ce4dp+9), com), 8) == DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.cd2b297d889bdp-54, 0x1.b253d9f33ce4dp+9), com), 8)) == decoration(DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.26f1fcdd502a3p-13, 0x1.53abd7bfc4fc6p+7), dac), 8) == DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.26f1fcdd502a3p-13, 0x1.53abd7bfc4fc6p+7), dac), 8)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), 3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), 3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), 3) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), 3)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), dac), 3) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), dac), 3)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), def), 3) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), def), 3)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.1902e978d4fdep+11, 0x1.1902e978d4fdfp+11), com), 3) == DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.1902e978d4fdep+11, 0x1.1902e978d4fdfp+11), com), 3)) == decoration(DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.81460637b9a3dp+38, -0x1.81460637b9a3cp+38), def), 3) == DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.81460637b9a3dp+38, -0x1.81460637b9a3cp+38), def), 3)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac), 3) == DecoratedInterval(Interval(0x1.428a2f98d728ap+341, 0x1.428a2f98d728bp+341), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), dac), 3)) == decoration(DecoratedInterval(Interval(0x1.428a2f98d728ap+341, 0x1.428a2f98d728bp+341), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), com), 3) == DecoratedInterval(Interval(-0x1.428a2f98d728bp+341, -0x1.428a2f98d728ap+341), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), com), 3)) == decoration(DecoratedInterval(Interval(-0x1.428a2f98d728bp+341, -0x1.428a2f98d728ap+341), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), def), 3) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), def), 3)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), def), 3) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), def), 3)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), 3) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), 3)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), 3) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), 3)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.0436d2f418938p+25, 0x1.f4p+3), com), 3) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.4p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.0436d2f418938p+25, 0x1.f4p+3), com), 3)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.4p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.0c6f7a0b5ed8dp-20, 0x1.94c75e6362a6p+3), dac), 3) == DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.0c6f7a0b5ed8dp-20, 0x1.94c75e6362a6p+3), dac), 3)) == decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.b6f9db22d0e55p+2, -0x1.266559f6ec5b1p-5), def), 3) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.b6f9db22d0e55p+2, -0x1.266559f6ec5b1p-5), def), 3)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv))
+    @test power_rev(DecoratedInterval(∅, trv), 7) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), 7)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), 7) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), 7)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), com), 7) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), com), 7)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 7) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), 7)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.f91d1b185493bp+25, 0x1.f91d1b185493cp+25), def), 7) == DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.f91d1b185493bp+25, 0x1.f91d1b185493cp+25), def), 7)) == decoration(DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.07b1da32f9b59p+90, -0x1.07b1da32f9b58p+90), dac), 7) == DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.07b1da32f9b59p+90, -0x1.07b1da32f9b58p+90), dac), 7)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com), 7) == DecoratedInterval(Interval(0x1.381147622f886p+146, 0x1.381147622f887p+146), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.fffffffffffffp1023, 0x1.fffffffffffffp1023), com), 7)) == decoration(DecoratedInterval(Interval(0x1.381147622f886p+146, 0x1.381147622f887p+146), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), def), 7) == DecoratedInterval(Interval(-0x1.381147622f887p+146, -0x1.381147622f886p+146), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.fffffffffffffp1023, -0x1.fffffffffffffp1023), def), 7)) == decoration(DecoratedInterval(Interval(-0x1.381147622f887p+146, -0x1.381147622f886p+146), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 7) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), 7)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), 7) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), 7)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), def), 7) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), def), 7)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), 7) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), 7)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.4f109959e6d7fp+58, 0x1.312dp+9), dac), 7) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.4p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.4f109959e6d7fp+58, 0x1.312dp+9), dac), 7)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.4p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.6849b86a12b9bp-47, 0x1.74d0373c76313p+8), com), 7) == DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.6849b86a12b9bp-47, 0x1.74d0373c76313p+8), com), 7)) == decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.658c775099757p+6, -0x1.bee30301bf47ap-12), def), 7) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.658c775099757p+6, -0x1.bee30301bf47ap-12), def), 7)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv))
+    @test power_rev(DecoratedInterval(∅, trv), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -2) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -2)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -2) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -2)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), com), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), com), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-10.0, 0.0), dac), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-10.0, 0.0), dac), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-10.0, -0.0), def), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-10.0, -0.0), def), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.7de3a077d1568p-8, 0x1.7de3a077d1569p-8), dac), -2)) == decoration(DecoratedInterval(Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3), trv))
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.3570290cd6e14p-26, 0x1.3570290cd6e15p-26), def), -2)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), com), -2) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), com), -2)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.3f0c482c977c9p-17, Inf), dac), -2) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.3f0c482c977c9p-17, Inf), dac), -2)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.793d85ef38e47p-3, 0x1.388p+13), def), -2) == DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.793d85ef38e47p-3, 0x1.388p+13), def), -2)) == decoration(DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.1ba81104f6c8p-2, 0x1.25d8fa1f801e1p+3), com), -2) == DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.1ba81104f6c8p-2, 0x1.25d8fa1f801e1p+3), com), -2)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), -8) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), -8)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), def), -8) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), def), -8)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -8) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -8)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), -8) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), -8)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), -8) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), -8)) == decoration(DecoratedInterval(∅, trv))
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.3cef39247ca6dp-30, 0x1.3cef39247ca6ep-30), com), -8)) == decoration(DecoratedInterval(Interval(-0x1.a333333333334p+3, 0x1.a333333333334p+3), trv))
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.113d9ef0a99acp-103, 0x1.113d9ef0a99adp-103), def), -8)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, 0x1.d1b251eb851edp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), dac), -8) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), dac), -8)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.34cc3764d1e0cp-67, Inf), def), -8) == DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.34cc3764d1e0cp-67, Inf), def), -8)) == decoration(DecoratedInterval(Interval(-0x1.444cccccccccep+8, 0x1.444cccccccccep+8), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.2dc80db11ab7cp-10, 0x1.1c37937e08p+53), com), -8) == DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.2dc80db11ab7cp-10, 0x1.1c37937e08p+53), com), -8)) == decoration(DecoratedInterval(Interval(-0x1.2a3d70a3d70a5p+1, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.81e104e61630dp-8, 0x1.bc64f21560e34p+12), def), -8) == DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.81e104e61630dp-8, 0x1.bc64f21560e34p+12), def), -8)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, 0x1.e666666666667p+0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), -1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), -1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), -1) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), -1)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), dac), -1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), dac), -1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), -1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), -1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.38abf82ee6986p-4, 0x1.38abf82ee6987p-4), def), -1) == DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333335p+3), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.38abf82ee6986p-4, 0x1.38abf82ee6987p-4), def), -1)) == decoration(DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333335p+3), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.197422c9048bfp-13, -0x1.197422c9048bep-13), dac), -1) == DecoratedInterval(Interval(-0x1.d1b251eb851eep+12, -0x1.d1b251eb851ebp+12), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.197422c9048bfp-13, -0x1.197422c9048bep-13), dac), -1)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851eep+12, -0x1.d1b251eb851ebp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x0.4p-1022, 0x0.4000000000001p-1022), dac), -1) == DecoratedInterval(Interval(0x1.ffffffffffff8p+1023, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x0.4p-1022, 0x0.4000000000001p-1022), dac), -1)) == decoration(DecoratedInterval(Interval(0x1.ffffffffffff8p+1023, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x0.4000000000001p-1022, -0x0.4p-1022), def), -1) == DecoratedInterval(Interval(-Inf, -0x1.ffffffffffff8p+1023), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x0.4000000000001p-1022, -0x0.4p-1022), def), -1)) == decoration(DecoratedInterval(Interval(-Inf, -0x1.ffffffffffff8p+1023), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -1) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -1)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -1) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -1)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), -1) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), -1)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), -1) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), -1)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.b77c278dbbe13p-2, 0x1.9p+6), com), -1) == DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.b77c278dbbe13p-2, 0x1.9p+6), com), -1)) == decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.83e0f83e0f83ep+1, -0x1.0d79435e50d79p-1), com), -1) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.83e0f83e0f83ep+1, -0x1.0d79435e50d79p-1), com), -1)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv))
+    @test power_rev(DecoratedInterval(∅, trv), -3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), -3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), -3) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), -3)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), -3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), -3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), -3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), dac), -3)) == decoration(DecoratedInterval(∅, trv))
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.d26df4d8b1831p-12, 0x1.d26df4d8b1832p-12), com), -3)) == decoration(DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv))
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.54347ded91b19p-39, -0x1.54347ded91b18p-39), def), -3)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), dac), -3) == DecoratedInterval(Interval(0x1p+358, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), dac), -3)) == decoration(DecoratedInterval(Interval(0x1p+358, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x0.0000000000001p-1022, -0x0p+0), def), -3) == DecoratedInterval(Interval(-Inf, -0x1p+358), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x0.0000000000001p-1022, -0x0p+0), def), -3)) == decoration(DecoratedInterval(Interval(-Inf, -0x1p+358), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -3) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -3)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -3) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), dac), -3)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), def), -3) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), def), -3)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), -3) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), -3)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.43cfba61aacabp-4, 0x1.e848p+19), com), -3) == DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.43cfba61aacabp-4, 0x1.e848p+19), com), -3)) == decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.bd393ce9e8e7cp+4, -0x1.2a95f6f7c066cp-3), def), -3) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.bd393ce9e8e7cp+4, -0x1.2a95f6f7c066cp-3), def), -3)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv))
+    @test power_rev(DecoratedInterval(∅, trv), -7) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), -7)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), -7) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), -7)) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), com), -7) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), com), -7)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), def), -7) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), def), -7)) == decoration(DecoratedInterval(∅, trv))
+#    @test power_rev(DecoratedInterval(Interval(0x1.037d76c912dbcp-26, 0x1.037d76c912dbdp-26), dac), -7) == DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.037d76c912dbcp-26, 0x1.037d76c912dbdp-26), dac), -7)) == decoration(DecoratedInterval(Interval(0x1.a333333333332p+3, 0x1.a333333333334p+3), trv))
+#    @test power_rev(DecoratedInterval(Interval(-0x1.f10f41fb8858fp-91, -0x1.f10f41fb8858ep-91), dac), -7) == DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.f10f41fb8858fp-91, -0x1.f10f41fb8858ep-91), dac), -7)) == decoration(DecoratedInterval(Interval(-0x1.d1b251eb851edp+12, -0x1.d1b251eb851ebp+12), trv))
+    @test power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), def), -7) == DecoratedInterval(Interval(0x1.588cea3f093bcp+153, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x0p+0, 0x0.0000000000001p-1022), def), -7)) == decoration(DecoratedInterval(Interval(0x1.588cea3f093bcp+153, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x0.0000000000001p-1022, -0x0p+0), def), -7) == DecoratedInterval(Interval(-Inf, -0x1.588cea3f093bcp+153), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x0.0000000000001p-1022, -0x0p+0), def), -7)) == decoration(DecoratedInterval(Interval(-Inf, -0x1.588cea3f093bcp+153), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -7) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), -7)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, Inf), def), -7) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, Inf), def), -7)) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), -7) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), -7)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), -7) == DecoratedInterval(Interval(-Inf, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), def), -7)) == decoration(DecoratedInterval(Interval(-Inf, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.5f934d64162a9p-9, 0x1.6bcc41e9p+46), com), -7) == DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.5f934d64162a9p-9, 0x1.6bcc41e9p+46), com), -7)) == decoration(DecoratedInterval(Interval(0x1.47ae147ae147ap-7, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.254cdd3711ddbp+11, -0x1.6e95c4a761e19p-7), com), -7) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.254cdd3711ddbp+11, -0x1.6e95c4a761e19p-7), com), -7)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -0x1.51eb851eb851ep-2), trv))
 end
 
-@testset "minimal_pown_rev_dec_bin_test" begin
-
+@testset "minimal_power_rev_dec_bin_test" begin
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(1.0, 1.0), def), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(1.0, 1.0), def), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(1.0, 1.0), dac), DecoratedInterval(Interval(1.0, 1.0), dac), 0) == DecoratedInterval(Interval(1.0, 1.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(1.0, 1.0), dac), DecoratedInterval(Interval(1.0, 1.0), dac), 0)) == decoration(DecoratedInterval(Interval(1.0, 1.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-1.0, 5.0), def), DecoratedInterval(Interval(-51.0, 12.0), dac), 0) == DecoratedInterval(Interval(-51.0, 12.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.0, 5.0), def), DecoratedInterval(Interval(-51.0, 12.0), dac), 0)) == decoration(DecoratedInterval(Interval(-51.0, 12.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-1.0, 0.0), com), DecoratedInterval(Interval(5.0, 10.0), dac), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.0, 0.0), com), DecoratedInterval(Interval(5.0, 10.0), dac), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-1.0, -0.0), dac), DecoratedInterval(Interval(-1.0, 1.0), def), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-1.0, -0.0), dac), DecoratedInterval(Interval(-1.0, 1.0), def), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(1.1, 10.0), def), DecoratedInterval(Interval(1.0, 41.0), dac), 0) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(1.1, 10.0), def), DecoratedInterval(Interval(1.0, 41.0), dac), 0)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 100.1), dac), 1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, 100.1), dac), 1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-5.1, 10.0), def), 1) == DecoratedInterval(Interval(-5.1, 10.0), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-5.1, 10.0), def), 1)) == decoration(DecoratedInterval(Interval(-5.1, 10.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-10.0, 5.1), dac), 1) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-10.0, 5.1), dac), 1)) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(1.0, 5.0), dac), 1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(1.0, 5.0), dac), 1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(5.0, 17.1), def), 2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(5.0, 17.1), def), 2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), DecoratedInterval(Interval(5.6, 27.544), dac), 2) == DecoratedInterval(Interval(5.6, 27.544), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), DecoratedInterval(Interval(5.6, 27.544), dac), 2)) == decoration(DecoratedInterval(Interval(5.6, 27.544), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(1.0, 2.0), def), 2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(1.0, 2.0), def), 2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.a36e2eb1c432cp-14, 0x1.5b7318fc50482p+2), com), DecoratedInterval(Interval(1.0, Inf), def), 2) == DecoratedInterval(Interval(1.0, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.a36e2eb1c432cp-14, 0x1.5b7318fc50482p+2), com), DecoratedInterval(Interval(1.0, Inf), def), 2)) == decoration(DecoratedInterval(Interval(1.0, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.be0ded288ce7p-4, 0x1.ce147ae147ae1p+1), dac), DecoratedInterval(Interval(-Inf, -1.0), def), 2) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -1.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.be0ded288ce7p-4, 0x1.ce147ae147ae1p+1), dac), DecoratedInterval(Interval(-Inf, -1.0), def), 2)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -1.0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-23.0, -1.0), dac), 3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-23.0, -1.0), dac), 3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-23.0, -1.0), com), 3) == DecoratedInterval(Interval(-23.0, -1.0), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-23.0, -1.0), com), 3)) == decoration(DecoratedInterval(Interval(-23.0, -1.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(1.0, 2.0), dac), 3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(1.0, 2.0), dac), 3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.0c6f7a0b5ed8dp-20, 0x1.94c75e6362a6p+3), com), DecoratedInterval(Interval(1.0, Inf), dac), 3) == DecoratedInterval(Interval(1.0, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.0c6f7a0b5ed8dp-20, 0x1.94c75e6362a6p+3), com), DecoratedInterval(Interval(1.0, Inf), dac), 3)) == decoration(DecoratedInterval(Interval(1.0, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(-0x1.b6f9db22d0e55p+2, -0x1.266559f6ec5b1p-5), com), DecoratedInterval(Interval(-Inf, -1.0), dac), 3) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -1.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-0x1.b6f9db22d0e55p+2, -0x1.266559f6ec5b1p-5), com), DecoratedInterval(Interval(-Inf, -1.0), dac), 3)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -1.0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-3.0, 17.3), def), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-3.0, 17.3), def), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, Inf), dac), DecoratedInterval(Interval(-5.1, -0.1), dac), -2) == DecoratedInterval(Interval(-5.1, -0.1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, Inf), dac), DecoratedInterval(Interval(-5.1, -0.1), dac), -2)) == decoration(DecoratedInterval(Interval(-5.1, -0.1), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(27.2, 55.1), dac), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(27.2, 55.1), dac), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.3f0c482c977c9p-17, Inf), def), DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), dac), -2) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.3f0c482c977c9p-17, Inf), def), DecoratedInterval(Interval(-Inf, -0x1.fffffffffffffp1023), dac), -2)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.793d85ef38e47p-3, 0x1.388p+13), com), DecoratedInterval(Interval(1.0, Inf), dac), -2) == DecoratedInterval(Interval(1.0, 0x1.2a3d70a3d70a5p+1), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.793d85ef38e47p-3, 0x1.388p+13), com), DecoratedInterval(Interval(1.0, Inf), dac), -2)) == decoration(DecoratedInterval(Interval(1.0, 0x1.2a3d70a3d70a5p+1), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.1ba81104f6c8p-2, 0x1.25d8fa1f801e1p+3), com), DecoratedInterval(Interval(-Inf, -1.0), dac), -2) == DecoratedInterval(Interval(-0x1.e666666666667p+0, -1.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.1ba81104f6c8p-2, 0x1.25d8fa1f801e1p+3), com), DecoratedInterval(Interval(-Inf, -1.0), dac), -2)) == decoration(DecoratedInterval(Interval(-0x1.e666666666667p+0, -1.0), trv))
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-5.1, 55.5), def), -1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-5.1, 55.5), def), -1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-5.1, 55.5), dac), -1) == DecoratedInterval(Interval(-5.1, 55.5), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-5.1, 55.5), dac), -1)) == decoration(DecoratedInterval(Interval(-5.1, 55.5), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-5.1, 55.5), def), -1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-5.1, 55.5), def), -1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), dac), DecoratedInterval(Interval(-1.0, 1.0), com), -1) == DecoratedInterval(Interval(-1.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), dac), DecoratedInterval(Interval(-1.0, 1.0), com), -1)) == decoration(DecoratedInterval(Interval(-1.0, 0.0), trv))
+    @test power_rev(DecoratedInterval(Interval(0x1.b77c278dbbe13p-2, 0x1.9p+6), def), DecoratedInterval(Interval(-1.0, 0.0), dac), -1) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0x1.b77c278dbbe13p-2, 0x1.9p+6), def), DecoratedInterval(Interval(-1.0, 0.0), dac), -1)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-5.1, 55.5), dac), -3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-5.1, 55.5), dac), -3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-5.1, 55.5), def), -3) == DecoratedInterval(Interval(-5.1, 55.5), trv)
+    @test decoration(power_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-5.1, 55.5), def), -3)) == decoration(DecoratedInterval(Interval(-5.1, 55.5), trv))
+    @test power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(-5.1, 55.5), def), -3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(0.0, 0.0), def), DecoratedInterval(Interval(-5.1, 55.5), def), -3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), DecoratedInterval(Interval(5.1, 55.5), com), -3) == DecoratedInterval(∅, trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, 0.0), dac), DecoratedInterval(Interval(5.1, 55.5), com), -3)) == decoration(DecoratedInterval(∅, trv))
+    @test power_rev(DecoratedInterval(Interval(-Inf, -0.0), dac), DecoratedInterval(Interval(-32.0, 1.1), def), -3) == DecoratedInterval(Interval(-32.0, 0.0), trv)
+    @test decoration(power_rev(DecoratedInterval(Interval(-Inf, -0.0), dac), DecoratedInterval(Interval(-32.0, 1.1), def), -3)) == decoration(DecoratedInterval(Interval(-32.0, 0.0), trv))
 end
 
-@testset "minimal_sin_rev_test" begin
-    @test sin_rev(∅, -∞..∞)[2] == ∅
-    @test sin_rev(Interval(-2.0, -1.1), -∞..∞)[2] == ∅
-    @test sin_rev(Interval(1.1, 2.0), -∞..∞)[2] == ∅
-    @test sin_rev(Interval(-1.0, 1.0), -∞..∞)[2] == entireinterval(Float64)
-    @test sin_rev(Interval(0.0, 0.0), -∞..∞)[2] == entireinterval(Float64)
-    @test sin_rev(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), -∞..∞)[2] == entireinterval(Float64)
+@testset "minimal_sinRev_test" begin
+    @test sin_rev(∅)[2] == ∅
+    @test sin_rev(Interval(-2.0, -1.1))[2] == ∅
+    @test sin_rev(Interval(1.1, 2.0))[2] == ∅
+    @test sin_rev(Interval(-1.0, 1.0))[2] == entireinterval(Float64)
+    @test sin_rev(Interval(0.0, 0.0))[2] == entireinterval(Float64)
+    @test sin_rev(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53))[2] == entireinterval(Float64)
 end
 
-@testset "minimal_sin_rev_bin_test" begin
+@testset "minimal_sinRevBin_test" begin
     @test sin_rev(∅, Interval(-1.2, 12.1))[2] == ∅
     @test sin_rev(Interval(-2.0, -1.1), Interval(-5.0, 5.0))[2] == ∅
     @test sin_rev(Interval(1.1, 2.0), Interval(-5.0, 5.0))[2] == ∅
@@ -142,22 +727,74 @@ end
     @test sin_rev(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), Interval(3.14, Inf))[2] == Interval(0x1.921fb54442d18p+1, Inf)
 end
 
-@testset "minimal_sin_rev_dec_test" begin
+@testset "minimal_sinRev_dec_test" begin
+    @test sin_rev(DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(-2.0, -1.1), com)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-2.0, -1.1), com))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(1.1, 2.0), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(1.1, 2.0), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(-1.0, 1.0), com)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-1.0, 1.0), com))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test sin_rev(DecoratedInterval(Interval(0.0, 0.0), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0.0, 0.0), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), def)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), def))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 
-@testset "minimal_sin_rev_dec_bin_test" begin
+@testset "minimal_sinRev_dec_bin_test" begin
+    @test sin_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.2, 12.1), com)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.2, 12.1), com))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(-2.0, -1.1), def), DecoratedInterval(Interval(-5.0, 5.0), def)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-2.0, -1.1), def), DecoratedInterval(Interval(-5.0, 5.0), def))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(1.1, 2.0), dac), DecoratedInterval(Interval(-5.0, 5.0), com)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(1.1, 2.0), dac), DecoratedInterval(Interval(-5.0, 5.0), com))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(-1.0, 1.0), com), DecoratedInterval(Interval(-1.2, 12.1), def)) == DecoratedInterval(Interval(-1.2, 12.1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-1.0, 1.0), com), DecoratedInterval(Interval(-1.2, 12.1), def))) == decoration(DecoratedInterval(Interval(-1.2, 12.1), trv))
+    @test sin_rev(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-1.0, 1.0), def)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0.0, 0.0), dac), DecoratedInterval(Interval(-1.0, 1.0), def))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(2.0, 2.5), trv)) == DecoratedInterval(∅, trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(2.0, 2.5), trv))) == decoration(DecoratedInterval(∅, trv))
+    @test sin_rev(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(3.0, 3.5), dac)) == DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0.0, -0.0), def), DecoratedInterval(Interval(3.0, 3.5), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d19p+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(0x1.fffffffffffffp-1, 0x1p+0), dac), DecoratedInterval(Interval(1.57, 1.58), dac)) == DecoratedInterval(Interval(0x1.921fb50442d18p+0, 0x1.921fb58442d1ap+0), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0x1.fffffffffffffp-1, 0x1p+0), dac), DecoratedInterval(Interval(1.57, 1.58), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb50442d18p+0, 0x1.921fb58442d1ap+0), trv))
+    @test sin_rev(DecoratedInterval(Interval(0.0, 0x1p+0), com), DecoratedInterval(Interval(-0.1, 1.58), dac)) == DecoratedInterval(Interval(0.0, 1.58), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0.0, 0x1p+0), com), DecoratedInterval(Interval(-0.1, 1.58), dac))) == decoration(DecoratedInterval(Interval(0.0, 1.58), trv))
+    @test sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com), DecoratedInterval(Interval(3.14, 3.15), def)) == DecoratedInterval(Interval(0x1.921fb54442d17p+1, 0x1.921fb54442d19p+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com), DecoratedInterval(Interval(3.14, 3.15), def))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d17p+1, 0x1.921fb54442d19p+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), com), DecoratedInterval(Interval(3.14, 3.15), dac)) == DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), com), DecoratedInterval(Interval(3.14, 3.15), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d1ap+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 0x1.1a62633145c07p-53), dac), DecoratedInterval(Interval(3.14, 3.15), com)) == DecoratedInterval(Interval(0x1.921fb54442d17p+1, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 0x1.1a62633145c07p-53), dac), DecoratedInterval(Interval(3.14, 3.15), com))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d17p+1, 0x1.921fb54442d1ap+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(Interval(-0.1, 3.15), def)) == DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0.0, 1.0), def), DecoratedInterval(Interval(-0.1, 3.15), def))) == decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-0.1, 3.15), com)) == DecoratedInterval(Interval(-0.0, 0x1.921fb54442d19p+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0.0, 1.0), dac), DecoratedInterval(Interval(-0.1, 3.15), com))) == decoration(DecoratedInterval(Interval(-0.0, 0x1.921fb54442d19p+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 1.0), def), DecoratedInterval(Interval(-0.1, 3.15), def)) == DecoratedInterval(Interval(-0x1.72cece675d1fep-52, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 1.0), def), DecoratedInterval(Interval(-0.1, 3.15), def))) == decoration(DecoratedInterval(Interval(-0x1.72cece675d1fep-52, 0x1.921fb54442d1ap+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 1.0), com), DecoratedInterval(Interval(0.0, 3.15), dac)) == DecoratedInterval(Interval(0.0, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 1.0), com), DecoratedInterval(Interval(0.0, 3.15), dac))) == decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d1ap+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1p+0), def), DecoratedInterval(Interval(3.14, 3.15), com)) == DecoratedInterval(Interval(3.14, 0x1.921fb54442d19p+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1p+0), def), DecoratedInterval(Interval(3.14, 3.15), com))) == decoration(DecoratedInterval(Interval(3.14, 0x1.921fb54442d19p+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 0x1p+0), dac), DecoratedInterval(Interval(1.57, 3.15), com)) == DecoratedInterval(Interval(1.57, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, 0x1p+0), dac), DecoratedInterval(Interval(1.57, 3.15), com))) == decoration(DecoratedInterval(Interval(1.57, 0x1.921fb54442d1ap+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com), DecoratedInterval(Interval(-Inf, 3.15), dac)) == DecoratedInterval(Interval(-Inf, 0x1.921fb54442d19p+1), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com), DecoratedInterval(Interval(-Inf, 3.15), dac))) == decoration(DecoratedInterval(Interval(-Inf, 0x1.921fb54442d19p+1), trv))
+    @test sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), com), DecoratedInterval(Interval(3.14, Inf), dac)) == DecoratedInterval(Interval(0x1.921fb54442d18p+1, Inf), trv)
+    @test decoration(sin_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), com), DecoratedInterval(Interval(3.14, Inf), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, Inf), trv))
 end
 
-@testset "minimal_cos_rev_test" begin
-    @test cos_rev(∅, -∞..∞)[2] == ∅
-    @test cos_rev(Interval(-2.0, -1.1), -∞..∞)[2] == ∅
-    @test cos_rev(Interval(1.1, 2.0), -∞..∞)[2] == ∅
-    @test cos_rev(Interval(-1.0, 1.0), -∞..∞)[2] == entireinterval(Float64)
-    @test cos_rev(Interval(0.0, 0.0), -∞..∞)[2] == entireinterval(Float64)
-    @test cos_rev(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), -∞..∞)[2] == entireinterval(Float64)
+@testset "minimal_cosRev_test" begin
+    @test cos_rev(∅)[2] == ∅
+    @test cos_rev(Interval(-2.0, -1.1))[2] == ∅
+    @test cos_rev(Interval(1.1, 2.0))[2] == ∅
+    @test cos_rev(Interval(-1.0, 1.0))[2] == entireinterval(Float64)
+    @test cos_rev(Interval(0.0, 0.0))[2] == entireinterval(Float64)
+    @test cos_rev(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53))[2] == entireinterval(Float64)
 end
 
-@testset "minimal_cos_rev_bin_test" begin
+@testset "minimal_cosRevBin_test" begin
     @test cos_rev(∅, Interval(-1.2, 12.1))[2] == ∅
     @test cos_rev(Interval(-2.0, -1.1), Interval(-5.0, 5.0))[2] == ∅
     @test cos_rev(Interval(1.1, 2.0), Interval(-5.0, 5.0))[2] == ∅
@@ -181,21 +818,75 @@ end
     @test cos_rev(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), Interval(-1.5, Inf))[2] == Interval(0x1.921fb54442d19p+0, Inf)
 end
 
-@testset "minimal_cos_rev_dec_test" begin
+@testset "minimal_cosRev_dec_test" begin
+    @test cos_rev(DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(cos_rev(DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test cos_rev(DecoratedInterval(Interval(-2.0, -1.1), def)) == DecoratedInterval(∅, trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-2.0, -1.1), def))) == decoration(DecoratedInterval(∅, trv))
+    @test cos_rev(DecoratedInterval(Interval(1.1, 2.0), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(1.1, 2.0), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test cos_rev(DecoratedInterval(Interval(-1.0, 1.0), com)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-1.0, 1.0), com))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test cos_rev(DecoratedInterval(Interval(0.0, 0.0), def)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0.0, 0.0), def))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 
-@testset "minimal_cos_rev_dec_bin_test" begin
+@testset "minimal_cosRev_dec_bin_test" begin
+    @test cos_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.2, 12.1), def)) == DecoratedInterval(∅, trv)
+    @test decoration(cos_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.2, 12.1), def))) == decoration(DecoratedInterval(∅, trv))
+    @test cos_rev(DecoratedInterval(Interval(-2.0, -1.1), dac), DecoratedInterval(Interval(-5.0, 5.0), com)) == DecoratedInterval(∅, trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-2.0, -1.1), dac), DecoratedInterval(Interval(-5.0, 5.0), com))) == decoration(DecoratedInterval(∅, trv))
+    @test cos_rev(DecoratedInterval(Interval(1.1, 2.0), dac), DecoratedInterval(Interval(-5.0, 5.0), com)) == DecoratedInterval(∅, trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(1.1, 2.0), dac), DecoratedInterval(Interval(-5.0, 5.0), com))) == decoration(DecoratedInterval(∅, trv))
+    @test cos_rev(DecoratedInterval(Interval(-1.0, 1.0), dac), DecoratedInterval(Interval(-1.2, 12.1), def)) == DecoratedInterval(Interval(-1.2, 12.1), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-1.0, 1.0), dac), DecoratedInterval(Interval(-1.2, 12.1), def))) == decoration(DecoratedInterval(Interval(-1.2, 12.1), trv))
+    @test cos_rev(DecoratedInterval(Interval(1.0, 1.0), def), DecoratedInterval(Interval(-0.1, 0.1), dac)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(1.0, 1.0), def), DecoratedInterval(Interval(-0.1, 0.1), dac))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test cos_rev(DecoratedInterval(Interval(-1.0, -1.0), com), DecoratedInterval(Interval(3.14, 3.15), dac)) == DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-1.0, -1.0), com), DecoratedInterval(Interval(3.14, 3.15), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+1, 0x1.921fb54442d1ap+1), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 0x1.1a62633145c07p-54), def), DecoratedInterval(Interval(1.57, 1.58), def)) == DecoratedInterval(Interval(0x1.921fb54442d17p+0, 0x1.921fb54442d19p+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 0x1.1a62633145c07p-54), def), DecoratedInterval(Interval(1.57, 1.58), def))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d17p+0, 0x1.921fb54442d19p+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-53, -0x1.72cece675d1fcp-53), dac), DecoratedInterval(Interval(1.57, 1.58), dac)) == DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d1ap+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-53, -0x1.72cece675d1fcp-53), dac), DecoratedInterval(Interval(1.57, 1.58), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d18p+0, 0x1.921fb54442d1ap+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-53, 0x1.1a62633145c07p-54), com), DecoratedInterval(Interval(1.57, 1.58), dac)) == DecoratedInterval(Interval(0x1.921fb54442d17p+0, 0x1.921fb54442d1ap+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-53, 0x1.1a62633145c07p-54), com), DecoratedInterval(Interval(1.57, 1.58), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d17p+0, 0x1.921fb54442d1ap+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 1.0), def), DecoratedInterval(Interval(-2.0, 2.0), com)) == DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 1.0), def), DecoratedInterval(Interval(-2.0, 2.0), com))) == decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+0, 0x1.921fb54442d19p+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 1.0), dac), DecoratedInterval(Interval(0.0, 2.0), def)) == DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-54, 1.0), dac), DecoratedInterval(Interval(0.0, 2.0), def))) == decoration(DecoratedInterval(Interval(0.0, 0x1.921fb54442d19p+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-53, 1.0), def), DecoratedInterval(Interval(-0.1, 1.5708), dac)) == DecoratedInterval(Interval(-0.1, 0x1.921fb54442d1ap+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-53, 1.0), def), DecoratedInterval(Interval(-0.1, 1.5708), dac))) == decoration(DecoratedInterval(Interval(-0.1, 0x1.921fb54442d1ap+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), dac), DecoratedInterval(Interval(3.14, 3.15), def)) == DecoratedInterval(Interval(0x1.921fb52442d18p+1, 0x1.921fb56442d1ap+1), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), dac), DecoratedInterval(Interval(3.14, 3.15), def))) == decoration(DecoratedInterval(Interval(0x1.921fb52442d18p+1, 0x1.921fb56442d1ap+1), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), def), DecoratedInterval(Interval(-3.15, -3.14), com)) == DecoratedInterval(Interval(-0x1.921fb56442d1ap+1, -0x1.921fb52442d18p+1), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), def), DecoratedInterval(Interval(-3.15, -3.14), com))) == decoration(DecoratedInterval(Interval(-0x1.921fb56442d1ap+1, -0x1.921fb52442d18p+1), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), def), DecoratedInterval(Interval(9.42, 9.45), dac)) == DecoratedInterval(Interval(0x1.2d97c7eb321d2p+3, 0x1.2d97c7fb321d3p+3), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1p+0, -0x1.fffffffffffffp-1), def), DecoratedInterval(Interval(9.42, 9.45), dac))) == decoration(DecoratedInterval(Interval(0x1.2d97c7eb321d2p+3, 0x1.2d97c7fb321d3p+3), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.87996529f9d92p-1, 1.0), dac), DecoratedInterval(Interval(-1.0, 0.1), def)) == DecoratedInterval(Interval(-0x1.6666666666667p-1, 0.1), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.87996529f9d92p-1, 1.0), dac), DecoratedInterval(Interval(-1.0, 0.1), def))) == decoration(DecoratedInterval(Interval(-0x1.6666666666667p-1, 0.1), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1.aa22657537205p-2, 0x1.14a280fb5068cp-1), com), DecoratedInterval(Interval(0.0, 2.1), dac)) == DecoratedInterval(Interval(0x1.fffffffffffffp-1, 0x1.0000000000001p+1), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1.aa22657537205p-2, 0x1.14a280fb5068cp-1), com), DecoratedInterval(Interval(0.0, 2.1), dac))) == decoration(DecoratedInterval(Interval(0x1.fffffffffffffp-1, 0x1.0000000000001p+1), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com), DecoratedInterval(Interval(-Inf, 1.58), dac)) == DecoratedInterval(Interval(-Inf, 0x1.921fb54442d18p+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com), DecoratedInterval(Interval(-Inf, 1.58), dac))) == decoration(DecoratedInterval(Interval(-Inf, 0x1.921fb54442d18p+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), def), DecoratedInterval(Interval(-Inf, 1.5), dac)) == DecoratedInterval(Interval(-Inf, -0x1.921fb54442d17p+0), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), def), DecoratedInterval(Interval(-Inf, 1.5), dac))) == decoration(DecoratedInterval(Interval(-Inf, -0x1.921fb54442d17p+0), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), dac), DecoratedInterval(Interval(-1.58, Inf), dac)) == DecoratedInterval(Interval(-0x1.921fb54442d1ap+0, Inf), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), dac), DecoratedInterval(Interval(-1.58, Inf), dac))) == decoration(DecoratedInterval(Interval(-0x1.921fb54442d1ap+0, Inf), trv))
+    @test cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), def), DecoratedInterval(Interval(-1.5, Inf), dac)) == DecoratedInterval(Interval(0x1.921fb54442d19p+0, Inf), trv)
+    @test decoration(cos_rev(DecoratedInterval(Interval(-0x1.72cece675d1fdp-52, -0x1.72cece675d1fcp-52), def), DecoratedInterval(Interval(-1.5, Inf), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d19p+0, Inf), trv))
 end
 
-@testset "minimal_tan_rev_test" begin
-    @test tan_rev(∅, -∞..∞)[2] == ∅
-    @test tan_rev(Interval(-1.0, 1.0), -∞..∞)[2] == entireinterval(Float64)
-    @test tan_rev(Interval(-156.0, -12.0), -∞..∞)[2] == entireinterval(Float64)
-    @test tan_rev(Interval(0.0, 0.0), -∞..∞)[2] == entireinterval(Float64)
-    @test tan_rev(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), -∞..∞)[2] == entireinterval(Float64)
+@testset "minimal_tanRev_test" begin
+    @test tan_rev(∅)[2] == ∅
+    @test tan_rev(Interval(-1.0, 1.0))[2] == entireinterval(Float64)
+    @test tan_rev(Interval(-156.0, -12.0))[2] == entireinterval(Float64)
+    @test tan_rev(Interval(0.0, 0.0))[2] == entireinterval(Float64)
+    @test tan_rev(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53))[2] == entireinterval(Float64)
 end
 
-@testset "minimal_tan_rev_bin_test" begin
+@testset "minimal_tanRevBin_test" begin
     @test tan_rev(∅, Interval(-1.5708, 1.5708))[2] == ∅
     @test tan_rev(entireinterval(Float64), Interval(-1.5708, 1.5708))[2] == Interval(-1.5708, 1.5708)
     @test tan_rev(Interval(0.0, 0.0), Interval(-1.5708, 1.5708))[2] == Interval(0.0, 0.0)
@@ -208,25 +899,295 @@ end
     @test tan_rev(Interval(-0x1.d02967c31cdb5p+53, 0x1.d02967c31cdb5p+53), Interval(-1.5707965, 1.5707965))[2] == Interval(-1.5707965, 1.5707965)
 end
 
-@testset "minimal_tan_rev_dec_test" begin
+@testset "minimal_tanRev_dec_test" begin
+    @test tan_rev(DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(tan_rev(DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test tan_rev(DecoratedInterval(Interval(-1.0, 1.0), com)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-1.0, 1.0), com))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test tan_rev(DecoratedInterval(Interval(-156.0, -12.0), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-156.0, -12.0), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test tan_rev(DecoratedInterval(Interval(0.0, 0.0), def)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(0.0, 0.0), def))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test tan_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(0x1.1a62633145c06p-53, 0x1.1a62633145c07p-53), com))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
 end
 
-@testset "minimal_tan_rev_dec_bin_test" begin
+@testset "minimal_tanRev_dec_bin_test" begin
+    @test tan_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.5708, 1.5708), def)) == DecoratedInterval(∅, trv)
+    @test decoration(tan_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(-1.5708, 1.5708), def))) == decoration(DecoratedInterval(∅, trv))
+    @test tan_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-1.5708, 1.5708), dac)) == DecoratedInterval(Interval(-1.5708, 1.5708), trv)
+    @test decoration(tan_rev(DecoratedInterval(entireinterval(Float64), def), DecoratedInterval(Interval(-1.5708, 1.5708), dac))) == decoration(DecoratedInterval(Interval(-1.5708, 1.5708), trv))
+    @test tan_rev(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-1.5708, 1.5708), def)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(0.0, 0.0), com), DecoratedInterval(Interval(-1.5708, 1.5708), def))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test tan_rev(DecoratedInterval(Interval(0x1.d02967c31cdb4p+53, 0x1.d02967c31cdb5p+53), dac), DecoratedInterval(Interval(-1.5708, 1.5708), def)) == DecoratedInterval(Interval(-0x1.921fb54442d1bp+0, 0x1.921fb54442d19p+0), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(0x1.d02967c31cdb4p+53, 0x1.d02967c31cdb5p+53), dac), DecoratedInterval(Interval(-1.5708, 1.5708), def))) == decoration(DecoratedInterval(Interval(-0x1.921fb54442d1bp+0, 0x1.921fb54442d19p+0), trv))
+    @test tan_rev(DecoratedInterval(Interval(-0x1.1a62633145c07p-53, -0x1.1a62633145c06p-53), def), DecoratedInterval(Interval(3.14, 3.15), dac)) == DecoratedInterval(Interval(0x1.921fb54442d17p+1, 0x1.921fb54442d19p+1), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-0x1.1a62633145c07p-53, -0x1.1a62633145c06p-53), def), DecoratedInterval(Interval(3.14, 3.15), dac))) == decoration(DecoratedInterval(Interval(0x1.921fb54442d17p+1, 0x1.921fb54442d19p+1), trv))
+    @test tan_rev(DecoratedInterval(Interval(0x1.72cece675d1fcp-52, 0x1.72cece675d1fdp-52), com), DecoratedInterval(Interval(-3.15, 3.15), com)) == DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d1ap+1), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(0x1.72cece675d1fcp-52, 0x1.72cece675d1fdp-52), com), DecoratedInterval(Interval(-3.15, 3.15), com))) == decoration(DecoratedInterval(Interval(-0x1.921fb54442d19p+1, 0x1.921fb54442d1ap+1), trv))
+    @test tan_rev(DecoratedInterval(Interval(-0x1.d02967c31p+53, 0x1.d02967c31p+53), def), DecoratedInterval(Interval(-Inf, 1.5707965), def)) == DecoratedInterval(Interval(-Inf, 0x1.921fb82c2bd7fp0), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-0x1.d02967c31p+53, 0x1.d02967c31p+53), def), DecoratedInterval(Interval(-Inf, 1.5707965), def))) == decoration(DecoratedInterval(Interval(-Inf, 0x1.921fb82c2bd7fp0), trv))
+    @test tan_rev(DecoratedInterval(Interval(-0x1.d02967c31p+53, 0x1.d02967c31p+53), com), DecoratedInterval(Interval(-1.5707965, Inf), dac)) == DecoratedInterval(Interval(-0x1.921fb82c2bd7fp0, Inf), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-0x1.d02967c31p+53, 0x1.d02967c31p+53), com), DecoratedInterval(Interval(-1.5707965, Inf), dac))) == decoration(DecoratedInterval(Interval(-0x1.921fb82c2bd7fp0, Inf), trv))
+    @test tan_rev(DecoratedInterval(Interval(-0x1.d02967c31p+53, 0x1.d02967c31p+53), com), DecoratedInterval(Interval(-1.5707965, 1.5707965), com)) == DecoratedInterval(Interval(-0x1.921fb82c2bd7fp0, 0x1.921fb82c2bd7fp0), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-0x1.d02967c31p+53, 0x1.d02967c31p+53), com), DecoratedInterval(Interval(-1.5707965, 1.5707965), com))) == decoration(DecoratedInterval(Interval(-0x1.921fb82c2bd7fp0, 0x1.921fb82c2bd7fp0), trv))
+    @test tan_rev(DecoratedInterval(Interval(-0x1.d02967c31cdb5p+53, 0x1.d02967c31cdb5p+53), dac), DecoratedInterval(Interval(-1.5707965, 1.5707965), def)) == DecoratedInterval(Interval(-1.5707965, 1.5707965), trv)
+    @test decoration(tan_rev(DecoratedInterval(Interval(-0x1.d02967c31cdb5p+53, 0x1.d02967c31cdb5p+53), dac), DecoratedInterval(Interval(-1.5707965, 1.5707965), def))) == decoration(DecoratedInterval(Interval(-1.5707965, 1.5707965), trv))
 end
+
 
 @testset "minimal_cosh_rev_test" begin
-
+    @test cosh_rev(∅)[2] == ∅
+    @test cosh_rev(Interval(1.0, Inf))[2] == entireinterval(Float64)
+    @test cosh_rev(Interval(0.0, Inf))[2] == entireinterval(Float64)
+    @test cosh_rev(Interval(1.0, 1.0))[2] == Interval(0.0, 0.0)
+    @test cosh_rev(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432))[2] == Interval(-0x1.2c903022dd7abp+8, 0x1.2c903022dd7abp+8)
 end
 
-@testset "minimal_cosh_rev_bin_test" begin
-
+@testset "minimal_cosh_revBin_test" begin
+    @test cosh_rev(∅, Interval(0.0, Inf))[2] == ∅
+    @test cosh_rev(Interval(1.0, Inf), Interval(0.0, Inf))[2] == Interval(0.0, Inf)
+    @test cosh_rev(Interval(0.0, Inf), Interval(1.0, 2.0))[2] == Interval(1.0, 2.0)
+    @test cosh_rev(Interval(1.0, 1.0), Interval(1.0, Inf))[2] == ∅
+    @test cosh_rev(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), Interval(-Inf, 0.0))[2] == Interval(-0x1.2c903022dd7abp+8, -0x1.fffffffffffffp-1)
 end
 
-@testset "minimal_cosh_rev_dec_test" begin
-
+@testset "minimal_coshRev_dec_test" begin
+    @test cosh_rev(DecoratedInterval(∅, trv)) == DecoratedInterval(∅, trv)
+    @test decoration(cosh_rev(DecoratedInterval(∅, trv))) == decoration(DecoratedInterval(∅, trv))
+    @test cosh_rev(DecoratedInterval(Interval(1.0, Inf), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(1.0, Inf), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test cosh_rev(DecoratedInterval(Interval(0.0, Inf), dac)) == DecoratedInterval(entireinterval(Float64), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(0.0, Inf), dac))) == decoration(DecoratedInterval(entireinterval(Float64), trv))
+    @test cosh_rev(DecoratedInterval(Interval(1.0, 1.0), def)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(1.0, 1.0), def))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test cosh_rev(DecoratedInterval(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), com)) == DecoratedInterval(Interval(-0x1.2c903022dd7abp+8, 0x1.2c903022dd7abp+8), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), com))) == decoration(DecoratedInterval(Interval(-0x1.2c903022dd7abp+8, 0x1.2c903022dd7abp+8), trv))
 end
 
-@testset "minimal_cosh_rev_dec_bin_test" begin
+@testset "minimal_coshRev_dec_bin_test" begin
+    @test cosh_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, Inf), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(cosh_rev(DecoratedInterval(∅, trv), DecoratedInterval(Interval(0.0, Inf), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test cosh_rev(DecoratedInterval(Interval(1.0, Inf), def), DecoratedInterval(Interval(0.0, Inf), dac)) == DecoratedInterval(Interval(0.0, Inf), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(1.0, Inf), def), DecoratedInterval(Interval(0.0, Inf), dac))) == decoration(DecoratedInterval(Interval(0.0, Inf), trv))
+    @test cosh_rev(DecoratedInterval(Interval(0.0, Inf), def), DecoratedInterval(Interval(1.0, 2.0), com)) == DecoratedInterval(Interval(1.0, 2.0), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(0.0, Inf), def), DecoratedInterval(Interval(1.0, 2.0), com))) == decoration(DecoratedInterval(Interval(1.0, 2.0), trv))
+    @test cosh_rev(DecoratedInterval(Interval(1.0, 1.0), dac), DecoratedInterval(Interval(1.0, Inf), def)) == DecoratedInterval(∅, trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(1.0, 1.0), dac), DecoratedInterval(Interval(1.0, Inf), def))) == decoration(DecoratedInterval(∅, trv))
+    @test cosh_rev(DecoratedInterval(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), com), DecoratedInterval(Interval(-Inf, 0.0), dac)) == DecoratedInterval(Interval(-0x1.2c903022dd7abp+8, -0x1.fffffffffffffp-1), trv)
+    @test decoration(cosh_rev(DecoratedInterval(Interval(0x1.8b07551d9f55p+0, 0x1.89bca168970c6p+432), com), DecoratedInterval(Interval(-Inf, 0.0), dac))) == decoration(DecoratedInterval(Interval(-0x1.2c903022dd7abp+8, -0x1.fffffffffffffp-1), trv))
+end
 
+@testset "minimal_mulRev_test" begin
+    @test mul_rev_IEEE1788(∅, Interval(1.0, 2.0)) == ∅
+    @test mul_rev_IEEE1788(Interval(1.0, 2.0), ∅) == ∅
+    @test mul_rev_IEEE1788(∅, ∅) == ∅
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-2.1, -0.4)) == Interval(0x1.999999999999ap-3, 0x1.5p+4)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-2.1, -0.4)) == Interval(0x1.999999999999ap-3, Inf)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-2.1, -0.4)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-2.1, -0.4)) == Interval(-Inf, -0x1.745d1745d1745p-2)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-2.1, -0.4)) == Interval(-0x1.a400000000001p+7, -0x1.745d1745d1745p-2)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-2.1, -0.4)) == ∅
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-2.1, -0.4)) == Interval(0.0, 0x1.5p+4)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-2.1, -0.4)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-2.1, -0.4)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-2.1, -0.4)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-2.1, -0.4)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-2.1, -0.4)) == Interval(-0x1.a400000000001p+7, 0.0)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-2.1, -0.4)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-2.1, 0.0)) == Interval(0.0, 0x1.5p+4)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-2.1, 0.0)) == Interval(-0x1.a400000000001p+7, 0.0)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-2.1, 0.0)) == Interval(0.0, 0x1.5p+4)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-2.1, 0.0)) == Interval(-0x1.a400000000001p+7, 0.0)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-2.1, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-2.1, 0.12)) == Interval(-0x1.3333333333333p+0, 0x1.5p+4)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-2.1, 0.12)) == Interval(-0x1.a400000000001p+7, 0x1.8p+3)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-2.1, 0.12)) == Interval(-0x1.3333333333333p+0, 0x1.5p+4)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-2.1, 0.12)) == Interval(-0x1.a400000000001p+7, 0x1.8p+3)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-2.1, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(0.0, 0.12)) == Interval(-0x1.3333333333333p+0, 0.0)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(0.0, 0.12)) == Interval(0.0, 0x1.8p+3)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(0.0, 0.12)) == Interval(-0x1.3333333333333p+0, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(0.0, 0.12)) == Interval(0.0, 0x1.8p+3)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(0.0, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(0.01, 0.12)) == Interval(-0x1.3333333333333p+0, -0x1.47ae147ae147bp-8)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(0.01, 0.12)) == Interval(-Inf, -0x1.47ae147ae147bp-8)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(0.01, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(0.01, 0.12)) == Interval(0x1.29e4129e4129dp-7, Inf)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(0.01, 0.12)) == Interval(0x1.29e4129e4129dp-7, 0x1.8p+3)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(0.01, 0.12)) == ∅
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(0.01, 0.12)) == Interval(-0x1.3333333333333p+0, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(0.01, 0.12)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(0.01, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(0.01, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(0.01, 0.12)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(0.01, 0.12)) == Interval(0.0, 0x1.8p+3)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(0.01, 0.12)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(0.0, 0.0)) == Interval(0.0, 0.0)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(0.0, 0.0)) == Interval(0.0, 0.0)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(0.0, 0.0)) == Interval(0.0, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(0.0, 0.0)) == Interval(0.0, 0.0)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(0.0, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-Inf, -0.1)) == Interval(0x1.999999999999ap-5, Inf)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-Inf, -0.1)) == Interval(0x1.999999999999ap-5, Inf)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-Inf, -0.1)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-Inf, -0.1)) == Interval(-Inf, -0x1.745d1745d1745p-4)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-Inf, -0.1)) == Interval(-Inf, -0x1.745d1745d1745p-4)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-Inf, -0.1)) == ∅
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-Inf, -0.1)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-Inf, -0.1)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-Inf, -0.1)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-Inf, -0.1)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-Inf, -0.1)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-Inf, -0.1)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-Inf, -0.1)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-Inf, 0.0)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-Inf, 0.0)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-Inf, 0.0)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-Inf, 0.0)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-Inf, 0.0)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-Inf, 0.3)) == Interval(-0x1.8p+1, Inf)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-Inf, 0.3)) == Interval(-Inf, 0x1.ep+4)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-Inf, 0.3)) == Interval(-0x1.8p+1, Inf)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-Inf, 0.3)) == Interval(-Inf, 0x1.ep+4)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-Inf, 0.3)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-0.21, Inf)) == Interval(-Inf, 0x1.0cccccccccccdp+1)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-0.21, Inf)) == Interval(-0x1.5p+4, Inf)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(-0.21, Inf)) == Interval(-Inf, 0x1.0cccccccccccdp+1)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(-0.21, Inf)) == Interval(-0x1.5p+4, Inf)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(-0.21, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(0.0, Inf)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(0.0, Inf)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(0.0, Inf)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(0.0, Inf)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(0.0, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(0.04, Inf)) == Interval(-Inf, -0x1.47ae147ae147bp-6)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), Interval(0.04, Inf)) == Interval(-Inf, -0x1.47ae147ae147bp-6)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(0.04, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), Interval(0.04, Inf)) == Interval(0x1.29e4129e4129dp-5, Inf)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(0.04, Inf)) == Interval(0x1.29e4129e4129dp-5, Inf)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), Interval(0.04, Inf)) == ∅
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(0.04, Inf)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), Interval(0.04, Inf)) == Interval(-Inf, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), Interval(0.04, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), Interval(0.04, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), Interval(0.04, Inf)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), Interval(0.04, Inf)) == Interval(0.0, Inf)
+    @test mul_rev_IEEE1788(entireinterval(Float64), Interval(0.04, Inf)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 0.0), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 1.1), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, 0.0), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 0.0), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-Inf, 1.1), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(-2.0, Inf), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.0, Inf), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(Interval(0.01, Inf), entireinterval(Float64)) == entireinterval(Float64)
+    @test mul_rev_IEEE1788(entireinterval(Float64), entireinterval(Float64)) == entireinterval(Float64)
+end
+
+@testset "minimal_mulRevTen_test" begin
+    @test mul_rev_IEEE1788(Interval(-2.0, -0.1), Interval(-2.1, -0.4), Interval(-2.1, -0.4)) == ∅
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(-2.1, -0.4), Interval(-2.1, -0.4)) == Interval(-2.1, -0.4)
+    @test mul_rev_IEEE1788(Interval(0.01, 1.1), Interval(-2.1, 0.0), Interval(-2.1, 0.0)) == Interval(-2.1, 0.0)
+    @test mul_rev_IEEE1788(Interval(-Inf, -0.1), Interval(0.0, 0.12), Interval(0.0, 0.12)) == Interval(0.0, 0.0)
+    @test mul_rev_IEEE1788(Interval(-2.0, 1.1), Interval(0.04, Inf), Interval(0.04, Inf)) == Interval(0.04, Inf)
+end
+
+@testset "minimal_mulRev_dec_test" begin
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-2.1, -0.4), dac)) == DecoratedInterval(Interval(0x1.999999999999ap-3, 0x1.5p+4), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-2.1, -0.4), dac))) == decoration(DecoratedInterval(Interval(0x1.999999999999ap-3, 0x1.5p+4), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(Interval(-2.1, 0.0), def)) == DecoratedInterval(Interval(0.0, 0x1.5p+4), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), def), DecoratedInterval(Interval(-2.1, 0.0), def))) == decoration(DecoratedInterval(Interval(0.0, 0x1.5p+4), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(-2.1, 0.12), dac)) == DecoratedInterval(Interval(-0x1.3333333333333p+0, 0x1.5p+4), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), com), DecoratedInterval(Interval(-2.1, 0.12), dac))) == decoration(DecoratedInterval(Interval(-0x1.3333333333333p+0, 0x1.5p+4), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-Inf, -0.1), dac), DecoratedInterval(Interval(0.0, 0.12), com)) == DecoratedInterval(Interval(-0x1.3333333333333p+0, 0.0), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-Inf, -0.1), dac), DecoratedInterval(Interval(0.0, 0.12), com))) == decoration(DecoratedInterval(Interval(-0x1.3333333333333p+0, 0.0), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(0.01, 1.1), def), DecoratedInterval(Interval(0.01, 0.12), dac)) == DecoratedInterval(Interval(0x1.29e4129e4129dp-7, 0x1.8p+3), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(0.01, 1.1), def), DecoratedInterval(Interval(0.01, 0.12), dac))) == decoration(DecoratedInterval(Interval(0x1.29e4129e4129dp-7, 0x1.8p+3), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(0.01, 1.1), dac), DecoratedInterval(Interval(-Inf, 0.3), def)) == DecoratedInterval(Interval(-Inf, 0x1.ep+4), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(0.01, 1.1), dac), DecoratedInterval(Interval(-Inf, 0.3), def))) == decoration(DecoratedInterval(Interval(-Inf, 0x1.ep+4), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-Inf, -0.1), trv), DecoratedInterval(Interval(-0.21, Inf), dac)) == DecoratedInterval(Interval(-Inf, 0x1.0cccccccccccdp+1), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-Inf, -0.1), trv), DecoratedInterval(Interval(-0.21, Inf), dac))) == decoration(DecoratedInterval(Interval(-Inf, 0x1.0cccccccccccdp+1), trv))
+end
+
+@testset "minimal_mulRev_dec_ten_test" begin
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-2.1, -0.4), dac), DecoratedInterval(Interval(-2.1, -0.4), dac)) == DecoratedInterval(∅, trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, -0.1), dac), DecoratedInterval(Interval(-2.1, -0.4), dac), DecoratedInterval(Interval(-2.1, -0.4), dac))) == decoration(DecoratedInterval(∅, trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, 1.1), def), DecoratedInterval(Interval(-2.1, -0.4), com), DecoratedInterval(Interval(-2.1, -0.4), com)) == DecoratedInterval(Interval(-2.1, -0.4), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, 1.1), def), DecoratedInterval(Interval(-2.1, -0.4), com), DecoratedInterval(Interval(-2.1, -0.4), com))) == decoration(DecoratedInterval(Interval(-2.1, -0.4), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(0.01, 1.1), com), DecoratedInterval(Interval(-2.1, 0.0), dac), DecoratedInterval(Interval(-2.1, 0.0), dac)) == DecoratedInterval(Interval(-2.1, 0.0), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(0.01, 1.1), com), DecoratedInterval(Interval(-2.1, 0.0), dac), DecoratedInterval(Interval(-2.1, 0.0), dac))) == decoration(DecoratedInterval(Interval(-2.1, 0.0), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-Inf, -0.1), dac), DecoratedInterval(Interval(0.0, 0.12), com), DecoratedInterval(Interval(0.0, 0.12), com)) == DecoratedInterval(Interval(0.0, 0.0), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-Inf, -0.1), dac), DecoratedInterval(Interval(0.0, 0.12), com), DecoratedInterval(Interval(0.0, 0.12), com))) == decoration(DecoratedInterval(Interval(0.0, 0.0), trv))
+    @test mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, 1.1), def), DecoratedInterval(Interval(0.04, Inf), dac), DecoratedInterval(Interval(0.04, Inf), dac)) == DecoratedInterval(Interval(0.04, Inf), trv)
+    @test decoration(mul_rev_IEEE1788(DecoratedInterval(Interval(-2.0, 1.1), def), DecoratedInterval(Interval(0.04, Inf), dac), DecoratedInterval(Interval(0.04, Inf), dac))) == decoration(DecoratedInterval(Interval(0.04, Inf), trv))
 end
 # FactCheck.exitstatus()

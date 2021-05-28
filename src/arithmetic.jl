@@ -97,6 +97,10 @@ function power_rev(a::Interval, b::Interval, n::Integer)  # a = b^n,  log(a) = n
         b1 = b ∩ root
         b2 = b ∩ (-root)
 
+    elseif n == 0
+        b_new = Interval(1, 1)
+        return(a, isempty(a ∩ b_new) ? ∅ : b, n)
+
     elseif iseven(n)
         root = a^(1//n)
 
@@ -133,7 +137,7 @@ end
 
 power_rev(a, b, c) = power_rev(promote(a, b, c)...)
 
-
+power_rev(a::Interval{T}, c) where T<:Real = power_rev(a, entireinterval(T), c)
 """
 Reverse square root
 """
@@ -162,7 +166,7 @@ function sqr_rev(c, x)   # c = x^2;  refine x
     return (c, hull(x1, x2))
 end
 
-sqr_rev(c) = sqr_rev(c, -∞..∞)
+sqr_rev(c::Interval{T}) where T<:Real = sqr_rev(c, entireinterval(T))
 
 """
 Reverse abs
@@ -176,6 +180,8 @@ function abs_rev(y, x)   # y = abs(x); refine x
 
     return (y, hull(x1, x2))
 end
+
+abs_rev(c::Interval{T}) where T<:Real = abs_rev(c, entireinterval(T))
 #=
 """
 Reverse sign
@@ -201,9 +207,12 @@ According to the IEEE-1788 standard:
 When `∘` is commutative, these agree and we write `∘_rev(b, c, x)`.
 """
 
-function mul_rev_IEEE1788(b, c, x)   # c = b*x
-    return x ∩ (c / b)
+function mul_rev_IEEE1788(b, c, x) 
+    temp = extended_div(c, b)  
+    return x ∩ (temp[1] ∪ temp[2])
 end
+
+mul_rev_IEEE1788(b::Interval{T}, c::Interval{T}) where T<:Real = mul_rev_IEEE1788(b, c, entireinterval(T))
 
 function pow_rev1(b, c, x)   # c = x^b
     return x ∩ c^(1/b)  # replace by 1//b
