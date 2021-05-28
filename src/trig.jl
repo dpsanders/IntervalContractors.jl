@@ -24,6 +24,7 @@ function sin_main(X::IntervalBox)
 end
 
 # TODO: Be careful with the pi constants if using e.g. BigFloats
+sin_full = symmetrise(sin_main, reflect_x(half_pi))
 sin_reverse = symmetrise(sin_main, reflect_x(half_pi))
 
 """
@@ -33,7 +34,8 @@ Contractor for `sin`.
 Takes an `IntervalBox` containing the `x` and `y` component intervals.
 Returns an `IntervalBox` contracted down to the set ``y = \\sin(x)``.
 """
-sin!(X::IntervalBox) = periodise(sin_main, two_pi)(X) ∪ periodise(sin_reverse, two_pi)(X)
+sin!(X::IntervalBox) = #periodise(sin_main, two_pi)(X) ∪ periodise(sin_reverse, two_pi)(X)
+periodise(sin_full, two_pi)(X)
 
 # Reverse function for sin; does not alter y
 """
@@ -78,6 +80,8 @@ end
 # TODO: Be careful with the pi constants if using e.g. BigFloats
 cos_reverse = symmetrise(cos_main, reflect_x(0.0))
 
+cos_full = symmetrise(cos_main, reflect_x(0.0))
+
 """
     cos!(X::IntervalBox)
 
@@ -85,8 +89,8 @@ Contractor for `cos`.
 Takes an `IntervalBox` containing the `x` and `y` component intervals.
 Returns an `IntervalBox` contracted down to the set ``y = \\cos(x)``.
 """
-cos!(X::IntervalBox) = periodise(cos_main, two_pi)(X) ∪ periodise(cos_reverse, two_pi)(X)
-
+cos!(X::IntervalBox) = #periodise(cos_main, two_pi)(X) ∪ periodise(cos_reverse, two_pi)(X)
+periodise(cos_full, two_pi)(X)
 
 # Reverse function for cos; does not alter y
 """
