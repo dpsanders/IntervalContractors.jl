@@ -90,7 +90,12 @@ inv_rev(a,b) = inv_rev(promote(a,b)...)
 """
 Reverse power
 """
-function power_rev(a::Interval, b::Interval, n::Integer)  # a = b^n,  log(a) = n.log(b),  b = a^(1/n)
+function power_rev(a::Interval{T}, b::Interval{T}, n::Integer) where T  # a = b^n,  log(a) = n.log(b),  b = a^(1/n)
+
+    if iszero(n)
+        1 ∈ a && return (a, entireinterval(T) ∩ b, n)
+        return (a, emptyinterval(T), n)
+    end
 
     if n == 2  # a = b^2
         root = √a
@@ -117,6 +122,7 @@ function power_rev(a::Interval, b::Interval, n::Integer)  # a = b^n,  log(a) = n
     return (a, b, n)
 end
 
+power_rev(a::Interval{T}, n::Integer) where T = power_rev(a, entireinterval(T), n)
 
 function power_rev(a::Interval, b::Interval, c::Interval)  # a = b^c
 
@@ -162,8 +168,6 @@ function sqr_rev(c, x)   # c = x^2;  refine x
     return (c, hull(x1, x2))
 end
 
-sqr_rev(c) = sqr_rev(c, -∞..∞)
-
 """
 Reverse abs
 """
@@ -201,14 +205,24 @@ According to the IEEE-1788 standard:
 When `∘` is commutative, these agree and we write `∘_rev(b, c, x)`.
 """
 
-function mul_rev_IEEE1788(b, c, x)   # c = b*x
-    return x ∩ (c / b)
-end
+mul_rev_IEEE1788(b, c, x) = mul_rev(c, x, b)[2]
 
 function pow_rev1(b, c, x)   # c = x^b
     return x ∩ c^(1/b)  # replace by 1//b
 end
 
 function pow_rev2(a, c, x)   # c = a^x
-    return x ∩ (log(c) / lob(a))
+    return x ∩ (log(c) / log(a))
 end
+
+mul_rev_to_pair(b::Interval, c::Interval) = extended_div(c, b)
+
+function mul_rev_to_pair(b::DecoratedInterval{T}, c::DecoratedInterval{T}) where T
+    (isnai(b) || isnai(c)) && return (nai(T), nai(T))
+
+    0 ∉ b && return (c/b, DecoratedInterval(emptyinterval(T), trv))
+    
+    x1, x2 = extended_div(interval(c), interval(b))
+    return (DecoratedInterval(x1, trv), DecoratedInterval(x2, trv))
+end
+
